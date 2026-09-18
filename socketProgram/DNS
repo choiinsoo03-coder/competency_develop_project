@@ -44,7 +44,13 @@ bind9
         mail    IN  A   192.168.56.102
 
       + AAAA Record: 호스트 네임에 주어진 도메인에 매핑되는 IPv6 형식의 IP 주소를 저장하는 레코드
+      + CNAME Record: 도메인 네임(alias name)을 다른 이름(canonical name)으로 매핑시키는 레코드
+
+  테스트 방법
+      sudo systemctl restart bind9
+      sudo systemctl status bind9
+
 
   DNS 확인 방법
-    nslookup A.com -> 도메인에 대한 ip를 확인하는 명령
+    nslookup A.com <주소 지정> -> 도메인에 대한 ip를 확인하는 명령
 
