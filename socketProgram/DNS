@@ -1,0 +1,50 @@
+리눅스 DNS 서버 생성 - bind9
+
+bind9
+
+  설치 방법 
+    sudo apt-get install bind9
+    sudo apt install bind9-dnsutils -> nslookup 등
+
+  중요 파일 
+  /etc/resolv.conf -> 리눅스에서 DNS 서버를 어디에 물어볼지 설정하는 파일
+                   -> nameserver 8.8.8.8
+                   -> nameserver 1.1.1.1 --> 백업 DNS
+                   ->  google.com -> /etc/resolve.conf -> nameserver -> google public DNS -> DNS query -> ip 획득
+                   -> DNS 서버라면 자기 ip를 네임서버에 넣어주면 이해하기 좋음
+  /etc/bind
+        named.conf -> 전체 설정
+        named.conf.options -> 동작 설정
+        named.conf.root-hints -> 루트 DNS 서버 정
+        rndc.key -> BIND 원격 제어 인증키
+        named.conf.local -> Zone file 
+
+
+
+    named.conf.local 
+        zone "corp.local" {   <- 루트 다음으로 관리하는 계층이 corp.local이라는 도메인이다.
+            type master;      <- 원본 데이터를 관리함
+            file "/etc/bind/db.corp.local"; <-실제 DNS 레코드 위치
+        };
+
+              
+    db.corp.local
+        $TTL 86400 <- DNS 정보를 다른 DNS 서버가 캐시에 얼마나 오래 저장할 수 있는지 (86400초 =24시간)
+        
+        @   IN  SOA ns.corp.local. admin.corp.local. (  <-SOA(Start of Authority) 정보 갱신 / @ = root 도메 = corp.local.
+                1       <- zone 파일 버전 번호(만든 횟수) 
+                604800  <- 7일  refresh(최신화)
+                86400   <- 24시간 retry(접근 실패 후 다시 시도하는 시간)
+                2419200 <- 28일 expire(만료시키는 시간)
+                86400   <- 7일 NXDOMAIN(존재하지 않는 DNS 이름에 대한 부정 응답 캐시 시간)
+        )
+        
+        @       IN  NS  ns.corp.local.   <- NS: DNS 서버 이름
+        ns      IN  A   192.168.56.101   <- A: 주소
+        mail    IN  A   192.168.56.102
+
+      + AAAA Record: 호스트 네임에 주어진 도메인에 매핑되는 IPv6 형식의 IP 주소를 저장하는 레코드
+
+  DNS 확인 방법
+    nslookup A.com -> 도메인에 대한 ip를 확인하는 명령
+
